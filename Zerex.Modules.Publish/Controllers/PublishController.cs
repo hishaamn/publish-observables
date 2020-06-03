@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
+using Sitecore.Diagnostics;
 using Sitecore.StringExtensions;
 using Zerex.Modules.Publish.Models;
 using Database = Zerex.Modules.Publish.Models.Database;
@@ -174,35 +175,72 @@ namespace Zerex.Modules.Publish.Controllers
             return new JsonResult { Data = responseModel, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        [System.Web.Http.HttpPost]
-        public ActionResult TriggerPublish(List<PublishItemModel> selectedItems)
+        [System.Web.Http.HttpGet]
+        public ActionResult GetPublishTargets()
         {
             var masterDatabase = Factory.GetDatabase("master");
 
-            var sourceTargetDatabase = masterDatabase.GetItem("/sitecore/system/Modules/Zerex Publishing/Databases").Children.FirstOrDefault();
+            var databases = masterDatabase.GetItem("/sitecore/system/Modules/Zerex Publishing/Databases").Children;
 
-            var sourceDb = Factory.GetDatabase(sourceTargetDatabase?.Fields["Source"].Value);
-            var targetDb = Factory.GetDatabase(sourceTargetDatabase?.Fields["Target"].Value);
+            var databaseList = new List<Database>();
 
-            foreach (var publishItemModel in selectedItems)
+            if (databases.Any())
             {
-                var options = new PublishOptions(sourceDb, targetDb, PublishMode.SingleItem, Language.Parse(publishItemModel.Language), DateTime.Now)
+                foreach (Item database in databases)
                 {
-                    Deep = true,
-                    PublishRelatedItems = true
-                };
-
-                if (publishItemModel.ItemId != null)
-                {
-                    options.RootItem = sourceDb.GetItem(new ID(publishItemModel.ItemId));
+                    databaseList.Add(new Database
+                    {
+                        SourceDatabase = database.Fields["Source"].Value,
+                        TargetDatabase = database.Fields["Target"].Value,
+                    });
                 }
-
-                var publisher = new Publisher(options);
-
-                publisher.PublishAsync();
             }
 
-            return new JsonResult { Data = "success", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            var responseModel = new Response
+            {
+                Databases = databaseList
+            };
+
+            return new JsonResult { Data = responseModel, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpPost]
+        public ActionResult TriggerPublish(List<PublishItemModel> selectedItems, List<Database> publishingTargets)
+        {
+            try
+            {
+                foreach (var publishingTarget in publishingTargets)
+                {
+                    var sourceDb = Factory.GetDatabase(publishingTarget.SourceDatabase);
+                    var targetDb = Factory.GetDatabase(publishingTarget.TargetDatabase);
+
+                    foreach (var publishItemModel in selectedItems)
+                    {
+                        var options = new PublishOptions(sourceDb, targetDb, PublishMode.SingleItem, Language.Parse(publishItemModel.Language), DateTime.Now)
+                        {
+                            Deep = true,
+                            PublishRelatedItems = true
+                        };
+
+                        if (publishItemModel.ItemId != null)
+                        {
+                            options.RootItem = sourceDb.GetItem(new ID(publishItemModel.ItemId));
+                        }
+
+                        var publisher = new Publisher(options);
+
+                        publisher.PublishAsync();
+                    }
+                }
+
+                return new JsonResult {Data = "success", JsonRequestBehavior = JsonRequestBehavior.AllowGet};
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"[Zerex Publishing] Error in triggering publish. Message: {ex.Message}.\r\n StackTrace: {ex.StackTrace}.\r\n InnerException: {ex.InnerException}", this);
+
+                return new JsonResult { Data = "Failed to trigger publish. See Sitecore logs", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            }
         }
 
         [System.Web.Http.HttpPost]

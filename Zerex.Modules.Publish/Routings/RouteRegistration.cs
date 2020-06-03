@@ -13,6 +13,12 @@ namespace Zerex.Modules.Publish.Routings
 
         public static void RegisterRoutes(RouteCollection routes)
         {
+            routes.MapRoute("GetPublishTargets", "api/publishing/getpublishtargets", new
+            {
+                action = "GetPublishTargets",
+                controller = "Publish"
+            });
+
             routes.MapRoute("GetConfiguredWorkflows", "api/publishing/configuration/workflow/get", new
             {
                 action = "GetConfiguredWorkflows",
