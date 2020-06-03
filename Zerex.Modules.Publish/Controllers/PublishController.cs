@@ -11,6 +11,7 @@ using System.Linq;
 using System.Web.Mvc;
 using Sitecore.StringExtensions;
 using Zerex.Modules.Publish.Models;
+using Database = Zerex.Modules.Publish.Models.Database;
 
 namespace Zerex.Modules.Publish.Controllers
 {
@@ -82,6 +83,92 @@ namespace Zerex.Modules.Publish.Controllers
             {
                 ConfiguredLanguages = languages,
                 PublishModels = itemList
+            };
+
+            return new JsonResult { Data = responseModel, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpGet]
+        public ActionResult GetConfiguredObservables()
+        {
+            var database = Factory.GetDatabase("master");
+
+            var observables = database.GetItem("/sitecore/system/Modules/Zerex Publishing/Observables").Children;
+
+            var observableList = new List<Observable>();
+
+            if (observables.Any())
+            {
+                foreach (Item observable in observables)
+                {
+                    observableList.Add(new Observable
+                    {
+                        SitecorePath = observable.Fields["Observe Path"].Value
+                    });
+                }
+            }
+
+            var responseModel = new Response
+            {
+                Observables = observableList
+            };
+
+            return new JsonResult { Data = responseModel, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpGet]
+        public ActionResult GetConfiguredWorkflows()
+        {
+            var database = Factory.GetDatabase("master");
+
+            var workflows = database.GetItem("/sitecore/system/Modules/Zerex Publishing/Workflows").Children;
+
+            var workflowList = new List<Workflow>();
+
+            if (workflows.Any())
+            {
+                foreach (Item workflow in workflows)
+                {
+                    workflowList.Add(new Workflow
+                    {
+                        ApprovedStateId = workflow.Fields["Workflow Approve State"].Value,
+                        StateName = workflow.Fields["Name"].Value
+                    });
+                }
+            }
+
+            var responseModel = new Response
+            {
+                Workflows = workflowList
+            };
+
+            return new JsonResult { Data = responseModel, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpGet]
+        public ActionResult GetConfiguredDatabases()
+        {
+            var masterDatabase = Factory.GetDatabase("master");
+
+            var databases = masterDatabase.GetItem("/sitecore/system/Modules/Zerex Publishing/Databases").Children;
+
+            var databaseList = new List<Database>();
+
+            if (databases.Any())
+            {
+                foreach (Item database in databases)
+                {
+                    databaseList.Add(new Database
+                    {
+                        SourceDatabase = database.Fields["Source"].Value,
+                        TargetDatabase = database.Fields["Target"].Value,
+                    });
+                }
+            }
+
+            var responseModel = new Response
+            {
+                Databases = databaseList
             };
 
             return new JsonResult { Data = responseModel, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
