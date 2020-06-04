@@ -1,0 +1,7 @@
+{
+  "paths": {
+    "ArcwaveUtils": "/sitecore/shell/client/Zerex/Assets/js/ArcwaveUtils"
+  },
+  "shim": { },
+  "map": { }
+}

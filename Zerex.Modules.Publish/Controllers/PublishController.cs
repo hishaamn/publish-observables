@@ -29,7 +29,7 @@ namespace Zerex.Modules.Publish.Controllers
 
             using (var scriptSession = ScriptSessionManager.NewSession("Default", true))
             {
-                var speScriptItem = Sitecore.Context.Database.GetItem(new ID("{1FF81FD2-C98A-46C5-8FF1-08E273FB9523}"));
+                var speScriptItem = database.GetItem(new ID("{1FF81FD2-C98A-46C5-8FF1-08E273FB9523}"));
 
                 var script = speScriptItem["Script"];
 
