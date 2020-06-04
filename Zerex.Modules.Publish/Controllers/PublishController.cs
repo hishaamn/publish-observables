@@ -102,9 +102,17 @@ namespace Zerex.Modules.Publish.Controllers
             {
                 foreach (Item observable in observables)
                 {
+                    var configuredPath = observable.Fields["Observe Path"].Value;
+
+                    var item = database.GetItem(configuredPath);
+                    
+                    var status = item != null ? "Item is available" : "Item is no more available";
+
                     observableList.Add(new Observable
                     {
-                        SitecorePath = observable.Fields["Observe Path"].Value
+                        ItemId = observable.ID.ToString(),
+                        SitecorePath = observable.Fields["Observe Path"].Value,
+                        Status = status
                     });
                 }
             }
@@ -130,10 +138,18 @@ namespace Zerex.Modules.Publish.Controllers
             {
                 foreach (Item workflow in workflows)
                 {
+                    var configuredId = workflow.Fields["Workflow Approve State"].Value;
+
+                    var item = database.GetItem(new ID(configuredId));
+
+                    var status = item != null ? "Item is available" : "Item is no more available";
+
                     workflowList.Add(new Workflow
                     {
+                        ItemId = workflow.ID.ToString(),
                         ApprovedStateId = workflow.Fields["Workflow Approve State"].Value,
-                        StateName = workflow.Fields["Name"].Value
+                        StateName = workflow.Fields["Name"].Value,
+                        Status = status
                     });
                 }
             }
@@ -161,6 +177,7 @@ namespace Zerex.Modules.Publish.Controllers
                 {
                     databaseList.Add(new Database
                     {
+                        ItemId = database.ID.ToString(),
                         SourceDatabase = database.Fields["Source"].Value,
                         TargetDatabase = database.Fields["Target"].Value,
                     });
@@ -337,6 +354,69 @@ namespace Zerex.Modules.Publish.Controllers
                         newItem.Fields["Name"].Value = item.Name;
                         newItem.Fields["Workflow Approve State"].Value = item.ID.ToString();
                         newItem.Editing.EndEdit();
+                    }
+                }
+            }
+
+            return new JsonResult { Data = "success", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpPost]
+        public ActionResult RemoveConfiguredObservables(List<Observable> selectedItems)
+        {
+            var database = Factory.GetDatabase("master");
+
+            foreach (var selectedItem in selectedItems)
+            {
+                var item = database.GetItem(new ID(selectedItem.ItemId));
+
+                if (item != null)
+                {
+                    using (new SecurityDisabler())
+                    {
+                        item.Recycle();
+                    }
+                }
+            }
+
+            return new JsonResult { Data = "success", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpPost]
+        public ActionResult RemoveConfiguredDatabases(List<Database> selectedItems)
+        {
+            var database = Factory.GetDatabase("master");
+
+            foreach (var selectedItem in selectedItems)
+            {
+                var item = database.GetItem(new ID(selectedItem.ItemId));
+
+                if (item != null)
+                {
+                    using (new SecurityDisabler())
+                    {
+                        item.Recycle();
+                    }
+                }
+            }
+
+            return new JsonResult { Data = "success", JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+        }
+
+        [System.Web.Http.HttpPost]
+        public ActionResult RemoveConfiguredWorkflows(List<Workflow> selectedItems)
+        {
+            var database = Factory.GetDatabase("master");
+
+            foreach (var selectedItem in selectedItems)
+            {
+                var item = database.GetItem(new ID(selectedItem.ItemId));
+
+                if (item != null)
+                {
+                    using (new SecurityDisabler())
+                    {
+                        item.Recycle();
                     }
                 }
             }

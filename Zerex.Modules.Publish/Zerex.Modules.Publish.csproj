@@ -186,6 +186,7 @@
   <ItemGroup>
     <None Include="App_Config\Modules\Zerex.Publish\Zerex.Framework.config" />
     <Content Include="sitecore\shell\client\Zerex\Assets\zerex-deps-config.json" />
+    <Content Include="PowerShell\GetPublishableItem.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="sitecore\shell\client\Zerex\Assets\js\ArcwaveUtils.js" />

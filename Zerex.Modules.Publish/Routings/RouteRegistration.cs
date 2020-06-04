@@ -13,6 +13,24 @@ namespace Zerex.Modules.Publish.Routings
 
         public static void RegisterRoutes(RouteCollection routes)
         {
+            routes.MapRoute("RemoveConfiguredObservables", "api/publishing/configuration/observable/delete", new
+            {
+                action = "RemoveConfiguredObservables",
+                controller = "Publish"
+            });
+
+            routes.MapRoute("RemoveConfiguredDatabases", "api/publishing/configuration/database/delete", new
+            {
+                action = "RemoveConfiguredDatabases",
+                controller = "Publish"
+            });
+
+            routes.MapRoute("RemoveConfiguredWorkflows", "api/publishing/configuration/workflow/delete", new
+            {
+                action = "RemoveConfiguredWorkflows",
+                controller = "Publish"
+            });
+
             routes.MapRoute("GetPublishTargets", "api/publishing/getpublishtargets", new
             {
                 action = "GetPublishTargets",
