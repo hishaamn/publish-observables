@@ -49,30 +49,33 @@ namespace Zerex.Modules.Publish.Controllers
                         {
                             if (resultItem is Item item)
                             {
-                                var flag = item.Fields["__Workflow state"].Value.IsNullOrEmpty();
-
-                                if (!flag)
+                                if (item.Fields["__Workflow state"] != null)
                                 {
-                                    foreach (Item workflow in workflows)
+                                    var flag = item.Fields["__Workflow state"].Value.IsNullOrEmpty();
+
+                                    if (!flag)
                                     {
-                                        if (item.State.GetWorkflow().WorkflowID.Equals(workflow.Fields["Workflow Approve State"].Value))
+                                        foreach (Item workflow in workflows)
                                         {
-                                            flag = true;
+                                            if (item.State.GetWorkflow().WorkflowID.Equals(workflow.Fields["Workflow Approve State"].Value))
+                                            {
+                                                flag = true;
+                                            }
                                         }
                                     }
-                                }
 
-                                if (flag)
-                                {
-                                    var model = new PublishItemModel
+                                    if (flag)
                                     {
-                                        ItemId = item.ID.ToString(),
-                                        Name = item.Name,
-                                        ItemPath = item.Paths.FullPath,
-                                        Language = item.Language.ToString()
-                                    };
+                                        var model = new PublishItemModel
+                                        {
+                                            ItemId = item.ID.ToString(),
+                                            Name = item.Name,
+                                            ItemPath = item.Paths.FullPath,
+                                            Language = item.Language.ToString()
+                                        };
 
-                                    itemList.Add(model);
+                                        itemList.Add(model);
+                                    }
                                 }
                             }
                         }
