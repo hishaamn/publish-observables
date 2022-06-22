@@ -101,7 +101,7 @@
       <Version>2.6.2</Version>
     </PackageReference>
     <PackageReference Include="Mvp.Xml" Version="2.3.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="SharpZipLib" Version="0.86.0" />
     <PackageReference Include="Sitecore.ContentSearch">
       <Version>9.3.0</Version>
